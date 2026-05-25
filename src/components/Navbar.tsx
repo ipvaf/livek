@@ -18,18 +18,15 @@ export function Navbar() {
           </div>
           <div className="leading-none">
             <span className="font-black text-foreground text-base">livek</span>
-            <span className="font-arabic text-primary text-xs ml-1">ليڤك</span>
+            <span className="font-arabic text-primary text-xs ml-1">لايفك</span>
           </div>
         </Link>
 
         {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-5 text-sm font-medium text-foreground-muted">
-          <Link href="/auctions" className="hover:text-foreground transition-colors">Live Auctions</Link>
-          <Link href="/auctions" className="hover:text-foreground transition-colors">Categories</Link>
+          <Link href="/auctions" className="hover:text-foreground transition-colors">Live Now</Link>
           <Link href="/creators" className="hover:text-foreground transition-colors">Creators</Link>
-          <Link href="/" className="hover:text-foreground transition-colors">Trending</Link>
-          <Link href="/" className="hover:text-foreground transition-colors">How It Works</Link>
-          <Link href="/sell" className="hover:text-foreground transition-colors">Pricing</Link>
+          <Link href="/#how-it-works" className="hover:text-foreground transition-colors">How It Works</Link>
         </nav>
 
         {/* Right */}
@@ -58,11 +55,9 @@ export function Navbar() {
       {/* Mobile menu */}
       {open && (
         <div className="lg:hidden border-t border-border bg-white px-4 py-3 space-y-1 text-sm font-medium">
-          <Link href="/auctions" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Live Auctions</Link>
-          <Link href="/auctions" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Categories</Link>
+          <Link href="/auctions" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Live Now</Link>
           <Link href="/creators" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Creators</Link>
-          <Link href="/" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Trending</Link>
-          <Link href="/sell" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Sell</Link>
+          <Link href="/#how-it-works" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>How It Works</Link>
           <div className="pt-2 flex gap-2">
             <Link href="/auth/login" className="flex-1 text-center border border-border rounded-lg py-2 text-foreground text-sm" onClick={() => setOpen(false)}>Log in</Link>
             <Link href="/auth/signup" className="flex-1 text-center bg-primary text-white rounded-lg py-2 text-sm" onClick={() => setOpen(false)}>Sign Up</Link>

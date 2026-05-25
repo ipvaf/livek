@@ -2,8 +2,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { Eye } from "lucide-react"
 import { Auction } from "@/lib/mock-data"
-import { formatKWD } from "@/lib/utils"
-import { CountdownTimer } from "@/components/CountdownTimer"
 
 const InstagramIcon = () => (
   <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 fill-current">
@@ -27,9 +25,9 @@ export function LiveAuctionCard({ auction }: { auction: Auction }) {
 
   return (
     <Link href={`/auctions/${auction.id}`} className="block auction-card">
-      <div className="bg-white border border-border rounded-2xl overflow-hidden">
+      <div className="bg-white border border-border rounded-2xl overflow-hidden hover:shadow-md hover:border-primary/30 transition-all duration-200">
         {/* Image */}
-        <div className="relative h-48 bg-surface">
+        <div className="relative h-44 bg-surface">
           <Image
             src={auction.imageUrl}
             alt={auction.title}
@@ -39,16 +37,20 @@ export function LiveAuctionCard({ auction }: { auction: Auction }) {
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-          {/* LIVE badge top-left */}
-          {auction.isLive && (
+          {/* LIVE / Offline badge top-left */}
+          {auction.isLive ? (
             <div className="absolute top-2 left-2 flex items-center gap-1 bg-live text-white text-xs font-bold px-2 py-0.5 rounded-full">
               <span className="h-1.5 w-1.5 rounded-full bg-white inline-block animate-pulse" />
               LIVE
             </div>
+          ) : (
+            <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/50 text-white/80 text-xs font-medium px-2 py-0.5 rounded-full">
+              Offline
+            </div>
           )}
 
-          {/* Viewer count top-right */}
-          {auction.viewers && (
+          {/* Viewer count top-right (only when live) */}
+          {auction.isLive && auction.viewers && (
             <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
               <Eye className="h-3 w-3" />
               {formatViewers(auction.viewers)}
@@ -66,24 +68,26 @@ export function LiveAuctionCard({ auction }: { auction: Auction }) {
           <p className="text-xs font-semibold text-foreground-muted uppercase tracking-wide mb-1">
             {auction.category}
           </p>
-          <h3 className="font-bold text-foreground text-sm leading-tight mb-1 line-clamp-2">
+          <h3 className="font-bold text-foreground text-sm leading-tight mb-2 line-clamp-2">
             {auction.title}
           </h3>
-          <div className="flex items-center gap-1 mb-3">
-            <span className="text-xs text-foreground-muted">{auction.creator.handle}</span>
-            {auction.creator.verified && (
-              <svg className="h-3 w-3 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            )}
-          </div>
-
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-foreground-muted">Current Bid</p>
-              <p className="font-black text-primary">{formatKWD(auction.currentBid)}</p>
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-foreground-muted">{auction.creator.handle}</span>
+              {auction.creator.verified && (
+                <svg className="h-3 w-3 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              )}
             </div>
-            <CountdownTimer endTime={auction.endTime} variant="compact" />
+            {auction.isLive ? (
+              <span className="text-xs text-live font-bold flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-live animate-pulse inline-block" />
+                Live Now
+              </span>
+            ) : (
+              <span className="text-xs text-foreground-muted">Offline</span>
+            )}
           </div>
         </div>
       </div>

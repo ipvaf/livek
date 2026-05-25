@@ -37,7 +37,7 @@ export function Footer() {
               </div>
               <div>
                 <span className="font-black text-foreground">livek</span>
-                <span className="font-arabic text-primary text-xs ml-1">ليڤك</span>
+                <span className="font-arabic text-primary text-xs ml-1">لايفك</span>
               </div>
             </div>
             <p className="text-xs text-foreground-muted leading-relaxed">
@@ -57,10 +57,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground text-sm mb-3">Platform</h4>
             <ul className="space-y-2 text-xs text-foreground-muted">
-              <li><Link href="/auctions" className="hover:text-primary transition-colors">Live Auctions</Link></li>
+              <li><Link href="/auctions" className="hover:text-primary transition-colors">Live Now</Link></li>
               <li><Link href="/creators" className="hover:text-primary transition-colors">Creators</Link></li>
-              <li><Link href="/auctions" className="hover:text-primary transition-colors">Categories</Link></li>
-              <li><Link href="/sell" className="hover:text-primary transition-colors">Sell an Item</Link></li>
+              <li><Link href="/#how-it-works" className="hover:text-primary transition-colors">How It Works</Link></li>
             </ul>
           </div>
 
