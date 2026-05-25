@@ -33,11 +33,11 @@ export function Footer() {
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white font-black text-sm">S</span>
+                <span className="text-white font-black text-sm">L</span>
               </div>
               <div>
-                <span className="font-black text-foreground">somtek</span>
-                <span className="font-arabic text-primary text-xs ml-1">سومتك</span>
+                <span className="font-black text-foreground">livek</span>
+                <span className="font-arabic text-primary text-xs ml-1">ليڤك</span>
               </div>
             </div>
             <p className="text-xs text-foreground-muted leading-relaxed">
@@ -126,7 +126,7 @@ export function Footer() {
 
         {/* Copyright */}
         <p className="text-center text-xs text-foreground-muted">
-          &copy; 2026 Somtek. All rights reserved.
+          &copy; 2026 Livek. All rights reserved.
         </p>
       </div>
     </footer>

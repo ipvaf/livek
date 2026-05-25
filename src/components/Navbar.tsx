@@ -14,11 +14,11 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-white font-black text-sm">S</span>
+            <span className="text-white font-black text-sm">L</span>
           </div>
           <div className="leading-none">
-            <span className="font-black text-foreground text-base">somtek</span>
-            <span className="font-arabic text-primary text-xs ml-1">سومتك</span>
+            <span className="font-black text-foreground text-base">livek</span>
+            <span className="font-arabic text-primary text-xs ml-1">ليڤك</span>
           </div>
         </Link>
 

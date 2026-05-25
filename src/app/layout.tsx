@@ -6,8 +6,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const cairo = Cairo({ subsets: ["arabic"], variable: "--font-cairo", display: "swap" })
 
 export const metadata: Metadata = {
-  title: "Somtek | Discover Live Auctions on Instagram & TikTok",
-  description: "Somtek helps you discover live auctions happening right now on Instagram and TikTok.",
+  title: "Livek | Discover Live Auctions on Instagram & TikTok",
+  description: "Livek helps you discover live auctions happening right now on Instagram and TikTok.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
