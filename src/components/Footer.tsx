@@ -57,7 +57,7 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground text-sm mb-3">Platform</h4>
             <ul className="space-y-2 text-xs text-foreground-muted">
-              <li><Link href="/auctions" className="hover:text-primary transition-colors">Live Now</Link></li>
+              <li><Link href="/" className="hover:text-primary transition-colors">Live Now</Link></li>
               <li><Link href="/creators" className="hover:text-primary transition-colors">Creators</Link></li>
               <li><Link href="/#how-it-works" className="hover:text-primary transition-colors">How It Works</Link></li>
               <li><Link href="/sell" className="hover:text-primary transition-colors">List Your Account</Link></li>
