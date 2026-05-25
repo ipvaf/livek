@@ -1,181 +1,83 @@
--- Mazady Database Schema
--- Run this in your Supabase SQL editor
+-- Livek — Creator Discovery Platform
+-- Run this in your Supabase SQL Editor to set up the database
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- =====================
--- USERS TABLE
--- =====================
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  email TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  avatar_url TEXT,
-  phone TEXT,
-  location TEXT DEFAULT 'Kuwait',
-  verified BOOLEAN DEFAULT FALSE,
-  rating DECIMAL(3,2) DEFAULT 5.0,
-  total_sales INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- =====================
--- CATEGORIES TABLE
--- =====================
+-- ── categories ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS categories (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT NOT NULL,
+  id    UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name    TEXT NOT NULL,
   name_ar TEXT NOT NULL,
-  icon TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  description TEXT,
-  item_count INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  icon    TEXT NOT NULL,
+  slug    TEXT NOT NULL UNIQUE,
+  count   INT  DEFAULT 0,
+  color   TEXT DEFAULT '#0B8A7E'
 );
 
 -- Seed categories
-INSERT INTO categories (name, name_ar, icon, slug) VALUES
-  ('Cars', 'سيارات', '🚗', 'cars'),
-  ('Electronics', 'إلكترونيات', '💻', 'electronics'),
-  ('Watches', 'ساعات', '⌚', 'watches'),
-  ('Real Estate', 'عقارات', '🏢', 'real-estate'),
-  ('Collectibles', 'مقتنيات', '🏺', 'collectibles'),
-  ('Fashion', 'موضة', '👜', 'fashion'),
-  ('Jewelry', 'مجوهرات', '💎', 'jewelry'),
-  ('Art', 'فنون', '🎨', 'art')
+INSERT INTO categories (name, name_ar, icon, slug, count, color) VALUES
+  ('Cars',                 'سيارات',            '🚗', 'cars',                142, '#EF4444'),
+  ('Watches',              'ساعات',             '⌚', 'watches',              98, '#F59E0B'),
+  ('Electronics',          'إلكترونيات',        '📱', 'electronics',          76, '#3B82F6'),
+  ('Sneakers',             'أحذية رياضية',      '👟', 'sneakers',             54, '#8B5CF6'),
+  ('Luxury Items',         'مقتنيات فاخرة',     '💎', 'luxury-items',         38, '#EC4899'),
+  ('Real Estate',          'عقارات',            '🏢', 'real-estate',           22, '#10B981'),
+  ('Gaming Collectibles',  'مقتنيات الألعاب',   '🃏', 'gaming-collectibles',   67, '#0B8A7E')
 ON CONFLICT (slug) DO NOTHING;
 
--- =====================
--- AUCTIONS TABLE
--- =====================
-CREATE TABLE IF NOT EXISTS auctions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  title TEXT NOT NULL,
-  title_ar TEXT,
-  description TEXT,
-  category TEXT NOT NULL REFERENCES categories(slug),
-  condition TEXT NOT NULL DEFAULT 'Good',
-  starting_price DECIMAL(12,3) NOT NULL,
-  current_bid DECIMAL(12,3) NOT NULL DEFAULT 0,
-  reserve_price DECIMAL(12,3),
-  end_time TIMESTAMPTZ NOT NULL,
-  seller_id UUID NOT NULL REFERENCES users(id),
-  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'ending_soon', 'completed', 'cancelled')),
-  location TEXT DEFAULT 'Kuwait',
-  image_url TEXT,
-  images TEXT[] DEFAULT '{}',
-  bids_count INTEGER DEFAULT 0,
-  views_count INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+
+-- ── creators ────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS creators (
+  id           UUID    DEFAULT gen_random_uuid() PRIMARY KEY,
+  handle       TEXT    NOT NULL UNIQUE,
+  display_name TEXT    NOT NULL,
+  platform     TEXT    NOT NULL CHECK (platform IN ('instagram', 'tiktok')),
+  followers    INT     DEFAULT 0,
+  country      TEXT    DEFAULT '',
+  flag         TEXT    DEFAULT '',
+  country_name TEXT    DEFAULT '',
+  category     TEXT    DEFAULT '',
+  is_verified  BOOLEAN DEFAULT FALSE,
+  is_live      BOOLEAN DEFAULT FALSE,
+  viewers      INT,
+  avatar_url   TEXT,
+  rating       NUMERIC(3,2) DEFAULT 0,
+  review_count INT     DEFAULT 0,
+  status       TEXT    DEFAULT 'approved' CHECK (status IN ('pending', 'approved', 'rejected')),
+  created_at   TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Index for faster queries
-CREATE INDEX IF NOT EXISTS idx_auctions_status ON auctions(status);
-CREATE INDEX IF NOT EXISTS idx_auctions_category ON auctions(category);
-CREATE INDEX IF NOT EXISTS idx_auctions_end_time ON auctions(end_time);
-CREATE INDEX IF NOT EXISTS idx_auctions_seller_id ON auctions(seller_id);
+-- Index for fast live-first sorting
+CREATE INDEX IF NOT EXISTS creators_is_live_viewers ON creators (is_live DESC, viewers DESC NULLS LAST);
+CREATE INDEX IF NOT EXISTS creators_platform ON creators (platform);
+CREATE INDEX IF NOT EXISTS creators_category ON creators (category);
 
--- =====================
--- BIDS TABLE
--- =====================
-CREATE TABLE IF NOT EXISTS bids (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  auction_id UUID NOT NULL REFERENCES auctions(id) ON DELETE CASCADE,
-  bidder_id UUID NOT NULL REFERENCES users(id),
-  amount DECIMAL(12,3) NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+
+-- ── creator_submissions ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS creator_submissions (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  handle      TEXT NOT NULL,
+  platform    TEXT NOT NULL CHECK (platform IN ('instagram', 'tiktok')),
+  profile_url TEXT,
+  category    TEXT NOT NULL,
+  country     TEXT NOT NULL,
+  followers   INT,
+  email       TEXT NOT NULL,
+  message     TEXT,
+  status      TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Index for bid lookups
-CREATE INDEX IF NOT EXISTS idx_bids_auction_id ON bids(auction_id);
-CREATE INDEX IF NOT EXISTS idx_bids_bidder_id ON bids(bidder_id);
-CREATE INDEX IF NOT EXISTS idx_bids_created_at ON bids(created_at DESC);
+-- Enable Row Level Security
+ALTER TABLE creators           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE creator_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories          ENABLE ROW LEVEL SECURITY;
 
--- =====================
--- WATCHLIST TABLE
--- =====================
-CREATE TABLE IF NOT EXISTS watchlist (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  auction_id UUID NOT NULL REFERENCES auctions(id) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, auction_id)
-);
+-- Public read access for approved creators & categories
+CREATE POLICY "Public read creators" ON creators
+  FOR SELECT USING (status = 'approved');
 
--- =====================
--- ROW LEVEL SECURITY
--- =====================
+CREATE POLICY "Public read categories" ON categories
+  FOR SELECT USING (TRUE);
 
--- Enable RLS
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE auctions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bids ENABLE ROW LEVEL SECURITY;
-ALTER TABLE watchlist ENABLE ROW LEVEL SECURITY;
-
--- Users: public read, own write
-CREATE POLICY "Users are publicly viewable" ON users FOR SELECT USING (true);
-CREATE POLICY "Users can update own profile" ON users FOR UPDATE USING (auth.uid() = id);
-
--- Auctions: public read, seller write
-CREATE POLICY "Auctions are publicly viewable" ON auctions FOR SELECT USING (true);
-CREATE POLICY "Users can create auctions" ON auctions FOR INSERT WITH CHECK (auth.uid() = seller_id);
-CREATE POLICY "Sellers can update own auctions" ON auctions FOR UPDATE USING (auth.uid() = seller_id);
-
--- Bids: public read for auction bids, own write
-CREATE POLICY "Bids are publicly viewable" ON bids FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can place bids" ON bids FOR INSERT WITH CHECK (auth.uid() = bidder_id);
-
--- Watchlist: own only
-CREATE POLICY "Users can view own watchlist" ON watchlist FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own watchlist" ON watchlist FOR ALL USING (auth.uid() = user_id);
-
--- =====================
--- FUNCTIONS & TRIGGERS
--- =====================
-
--- Auto-update current_bid when new bid is placed
-CREATE OR REPLACE FUNCTION update_auction_on_bid()
-RETURNS TRIGGER AS $$
-BEGIN
-  UPDATE auctions
-  SET
-    current_bid = NEW.amount,
-    bids_count = bids_count + 1,
-    updated_at = NOW()
-  WHERE id = NEW.auction_id AND current_bid < NEW.amount;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER on_bid_placed
-  AFTER INSERT ON bids
-  FOR EACH ROW
-  EXECUTE FUNCTION update_auction_on_bid();
-
--- Auto-mark auctions as ending_soon (within 2 hours)
-CREATE OR REPLACE FUNCTION mark_ending_soon()
-RETURNS void AS $$
-BEGIN
-  UPDATE auctions
-  SET status = 'ending_soon', updated_at = NOW()
-  WHERE
-    status = 'active'
-    AND end_time BETWEEN NOW() AND NOW() + INTERVAL '2 hours';
-
-  UPDATE auctions
-  SET status = 'completed', updated_at = NOW()
-  WHERE
-    status IN ('active', 'ending_soon')
-    AND end_time < NOW();
-END;
-$$ LANGUAGE plpgsql;
-
--- =====================
--- REALTIME
--- =====================
--- Enable realtime for live bidding
-ALTER PUBLICATION supabase_realtime ADD TABLE auctions;
-ALTER PUBLICATION supabase_realtime ADD TABLE bids;
+-- Anyone can submit (insert only, no read of others' submissions)
+CREATE POLICY "Anyone can submit" ON creator_submissions
+  FOR INSERT WITH CHECK (TRUE);

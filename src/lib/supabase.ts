@@ -8,78 +8,87 @@ export const supabase = createClient(
 export type Database = {
   public: {
     Tables: {
-      users: {
+      creators: {
         Row: {
           id: string
-          email: string
-          name: string
+          handle: string
+          display_name: string
+          platform: 'instagram' | 'tiktok'
+          followers: number
+          country: string
+          flag: string
+          country_name: string
+          category: string
+          is_verified: boolean
+          is_live: boolean
+          viewers: number | null
           avatar_url: string | null
+          rating: number
+          review_count: number
+          status: 'pending' | 'approved' | 'rejected'
           created_at: string
         }
         Insert: {
           id?: string
+          handle: string
+          display_name: string
+          platform: 'instagram' | 'tiktok'
+          followers?: number
+          country?: string
+          flag?: string
+          country_name?: string
+          category?: string
+          is_verified?: boolean
+          is_live?: boolean
+          viewers?: number | null
+          avatar_url?: string | null
+          rating?: number
+          review_count?: number
+          status?: 'pending' | 'approved' | 'rejected'
+          created_at?: string
+        }
+        Update: {
+          handle?: string
+          display_name?: string
+          followers?: number
+          is_live?: boolean
+          viewers?: number | null
+          avatar_url?: string | null
+          rating?: number
+          review_count?: number
+          status?: 'pending' | 'approved' | 'rejected'
+        }
+      }
+      creator_submissions: {
+        Row: {
+          id: string
+          handle: string
+          platform: 'instagram' | 'tiktok'
+          profile_url: string | null
+          category: string
+          country: string
+          followers: number | null
           email: string
-          name: string
-          avatar_url?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          email?: string
-          name?: string
-          avatar_url?: string | null
-        }
-      }
-      auctions: {
-        Row: {
-          id: string
-          title: string
-          description: string
-          category: string
-          starting_price: number
-          current_bid: number
-          reserve_price: number
-          end_time: string
-          seller_id: string
-          status: 'active' | 'ending_soon' | 'completed'
+          message: string | null
+          status: 'pending' | 'approved' | 'rejected'
           created_at: string
         }
         Insert: {
           id?: string
-          title: string
-          description: string
+          handle: string
+          platform: 'instagram' | 'tiktok'
+          profile_url?: string | null
           category: string
-          starting_price: number
-          current_bid: number
-          reserve_price: number
-          end_time: string
-          seller_id: string
-          status?: 'active' | 'ending_soon' | 'completed'
+          country: string
+          followers?: number | null
+          email: string
+          message?: string | null
+          status?: 'pending' | 'approved' | 'rejected'
           created_at?: string
         }
         Update: {
-          title?: string
-          description?: string
-          current_bid?: number
-          status?: 'active' | 'ending_soon' | 'completed'
+          status?: 'pending' | 'approved' | 'rejected'
         }
-      }
-      bids: {
-        Row: {
-          id: string
-          auction_id: string
-          bidder_id: string
-          amount: number
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          auction_id: string
-          bidder_id: string
-          amount: number
-          created_at?: string
-        }
-        Update: never
       }
       categories: {
         Row: {
@@ -88,6 +97,8 @@ export type Database = {
           name_ar: string
           icon: string
           slug: string
+          count: number
+          color: string
         }
         Insert: {
           id?: string
@@ -95,12 +106,16 @@ export type Database = {
           name_ar: string
           icon: string
           slug: string
+          count?: number
+          color?: string
         }
         Update: {
           name?: string
           name_ar?: string
           icon?: string
           slug?: string
+          count?: number
+          color?: string
         }
       }
     }

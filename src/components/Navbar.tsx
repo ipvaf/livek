@@ -38,6 +38,9 @@ export function Navbar() {
             <Globe className="h-4 w-4" />
             EN
           </button>
+          <Link href="/sell" className="text-sm font-semibold text-primary border border-primary/30 bg-primary-light hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg transition-all">
+            List Account
+          </Link>
           <Link href="/auth/login" className="text-sm font-medium text-foreground-muted hover:text-foreground px-3 py-1.5 rounded-lg transition-colors border border-transparent hover:border-border">
             Log in
           </Link>
@@ -58,6 +61,7 @@ export function Navbar() {
           <Link href="/auctions" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Live Now</Link>
           <Link href="/creators" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Creators</Link>
           <Link href="/#how-it-works" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>How It Works</Link>
+          <Link href="/sell" className="block py-2 text-primary font-semibold hover:text-primary-hover" onClick={() => setOpen(false)}>List Your Account</Link>
           <div className="pt-2 flex gap-2">
             <Link href="/auth/login" className="flex-1 text-center border border-border rounded-lg py-2 text-foreground text-sm" onClick={() => setOpen(false)}>Log in</Link>
             <Link href="/auth/signup" className="flex-1 text-center bg-primary text-white rounded-lg py-2 text-sm" onClick={() => setOpen(false)}>Sign Up</Link>
