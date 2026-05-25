@@ -41,7 +41,7 @@ export default async function LiveSessionPage({ params }: { params: Promise<{ id
       <Navbar />
 
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-primary mb-6 transition-colors">
+        <Link href="/auctions" className="inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-primary mb-6 transition-colors">
           <ArrowLeft className="h-4 w-4" />
           Back to Live Now
         </Link>

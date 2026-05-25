@@ -24,7 +24,7 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-5 text-sm font-medium text-foreground-muted">
-          <Link href="/" className="hover:text-foreground transition-colors">Live Now</Link>
+          <Link href="/auctions" className="hover:text-foreground transition-colors">Live Now</Link>
           <Link href="/creators" className="hover:text-foreground transition-colors">Creators</Link>
           <Link href="/#how-it-works" className="hover:text-foreground transition-colors">How It Works</Link>
         </nav>
@@ -58,7 +58,7 @@ export function Navbar() {
       {/* Mobile menu */}
       {open && (
         <div className="lg:hidden border-t border-border bg-white px-4 py-3 space-y-1 text-sm font-medium">
-          <Link href="/" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Live Now</Link>
+          <Link href="/auctions" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Live Now</Link>
           <Link href="/creators" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Creators</Link>
           <Link href="/#how-it-works" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>How It Works</Link>
           <Link href="/sell" className="block py-2 text-primary font-semibold hover:text-primary-hover" onClick={() => setOpen(false)}>List Your Account</Link>
