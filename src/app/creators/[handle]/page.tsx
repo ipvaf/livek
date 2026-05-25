@@ -130,8 +130,8 @@ export default function CreatorPage({ params }: { params: { handle: string } }) 
 
         {/* Info tip */}
         <div className="bg-primary-light border border-primary/20 rounded-xl p-4 text-sm text-primary">
-          💡 <strong>How it works:</strong> This creator runs live auctions on {isIG ? "Instagram" : "TikTok"}.
-          Join their live stream to participate in real-time bidding.
+          💡 <strong>How it works:</strong> This creator runs live auction sessions on {isIG ? "Instagram" : "TikTok"}.
+          Head to their profile, follow them, and you&apos;ll get notified the moment they go live.
         </div>
       </div>
 

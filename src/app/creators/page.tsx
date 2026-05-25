@@ -38,8 +38,8 @@ export default function CreatorsPage() {
       {/* Hero */}
       <section className="bg-white border-b border-border py-14 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl font-black text-foreground mb-2">Discover Auction Creators</h1>
-          <p className="text-foreground-muted mb-8">Follow the best live auction sellers on Instagram and TikTok</p>
+          <h1 className="text-4xl font-black text-foreground mb-2">Creator Directory</h1>
+          <p className="text-foreground-muted mb-8">Browse all verified live auction creators on Instagram and TikTok</p>
 
           <div className="relative max-w-md mx-auto">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-muted" />
