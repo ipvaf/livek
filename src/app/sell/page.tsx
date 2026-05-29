@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
+import { useAuth } from "@/contexts/AuthContext"
 import { categories } from "@/lib/mock-data"
 import { CheckCircle } from "lucide-react"
 
@@ -25,16 +26,18 @@ const TikTokIcon = () => (
 )
 
 export default function ListAccountPage() {
+  const { user } = useAuth()
   const [platform, setPlatform] = useState<"instagram" | "tiktok">("instagram")
   const [handle, setHandle] = useState("")
   const [profileUrl, setProfileUrl] = useState("")
   const [category, setCategory] = useState("")
   const [country, setCountry] = useState("")
   const [followers, setFollowers] = useState("")
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState(user?.email ?? "")
   const [message, setMessage] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [serverError, setServerError] = useState("")
 
   const isValid = handle.trim() && category && country && email.includes("@")
 
@@ -42,21 +45,32 @@ export default function ListAccountPage() {
     e.preventDefault()
     if (!isValid) return
     setLoading(true)
+    setServerError("")
 
-    // TODO: connect to Supabase when env vars are set
-    // await supabase.from('creator_submissions').insert({
-    //   handle: handle.startsWith('@') ? handle : `@${handle}`,
-    //   platform,
-    //   profile_url: profileUrl || null,
-    //   category,
-    //   country,
-    //   followers: followers ? Number(followers) : null,
-    //   email,
-    //   message: message || null,
-    // })
+    const res = await fetch("/api/creator/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        handle,
+        platform,
+        profileUrl,
+        category,
+        country,
+        followers,
+        email,
+        message,
+        userId: user?.id ?? "",
+      }),
+    })
 
-    await new Promise(r => setTimeout(r, 900)) // simulate network
+    const data = await res.json()
     setLoading(false)
+
+    if (!res.ok || data.error) {
+      setServerError(data.error ?? "Something went wrong — please try again")
+      return
+    }
+
     setSubmitted(true)
   }
 
@@ -75,14 +89,22 @@ export default function ListAccountPage() {
             Thanks for submitting <span className="font-semibold text-foreground">{handle.startsWith("@") ? handle : `@${handle}`}</span>.
           </p>
           <p className="text-foreground-muted mb-8">
-            Our team will review your account and get back to you within <strong>48 hours</strong>. We&apos;ll email you at <span className="font-semibold text-foreground">{email}</span>.
+            Our team will review your account and get back to you within{" "}
+            <strong>48 hours</strong>. We&apos;ll email you at{" "}
+            <span className="font-semibold text-foreground">{email}</span>.
           </p>
-          <a href="/" className="inline-block bg-primary hover:bg-primary-hover text-white font-bold px-6 py-3 rounded-xl transition-colors">
-            Back to Home
-          </a>
+          {user ? (
+            <a href="/profile" className="inline-block bg-primary hover:bg-primary-hover text-white font-bold px-6 py-3 rounded-xl transition-colors">
+              View My Profile
+            </a>
+          ) : (
+            <a href="/" className="inline-block bg-primary hover:bg-primary-hover text-white font-bold px-6 py-3 rounded-xl transition-colors">
+              Back to Home
+            </a>
+          )}
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
 
           {/* Left: value prop */}
           <div className="lg:pt-4">
@@ -94,7 +116,7 @@ export default function ListAccountPage() {
             </h1>
             <p className="font-arabic text-primary text-lg mb-6">سجّل حسابك على لايفك</p>
             <p className="text-foreground-muted text-base leading-relaxed mb-10 max-w-md">
-              Thousands of buyers visit Livek every day looking for live auction creators.
+              Thousands of people visit Livek every day looking for live creators.
               Get listed for free and grow your audience.
             </p>
 
@@ -120,8 +142,24 @@ export default function ListAccountPage() {
           </div>
 
           {/* Right: Form */}
-          <div className="bg-white border border-border rounded-2xl p-8">
+          <div className="bg-white border border-border rounded-2xl p-5 sm:p-8">
+            {/* Logged-in banner */}
+            {user && (
+              <div className="mb-5 bg-primary-light border border-primary/20 text-primary text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+                <span className="text-base">👤</span>
+                <span>
+                  Submitting as <strong>{user.user_metadata?.full_name || user.email}</strong> — your application will be linked to your account.
+                </span>
+              </div>
+            )}
+
             <h2 className="font-black text-foreground text-xl mb-6">Your Information</h2>
+
+            {serverError && (
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+                {serverError}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -185,7 +223,7 @@ export default function ListAccountPage() {
               </div>
 
               {/* Category + Country row */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-foreground-muted uppercase tracking-wide mb-1.5">Category</label>
                   <select
@@ -229,7 +267,7 @@ export default function ListAccountPage() {
                 />
               </div>
 
-              {/* Email */}
+              {/* Email — pre-filled & locked if logged in */}
               <div>
                 <label className="block text-xs font-semibold text-foreground-muted uppercase tracking-wide mb-1.5">Email Address</label>
                 <input
@@ -238,9 +276,14 @@ export default function ListAccountPage() {
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
-                  className="w-full px-4 py-3 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                  readOnly={!!user}
+                  className={`w-full px-4 py-3 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all ${
+                    user ? "bg-surface text-foreground-muted cursor-default" : "text-foreground"
+                  }`}
                 />
-                <p className="text-xs text-foreground-muted mt-1">We&apos;ll send your approval status here</p>
+                <p className="text-xs text-foreground-muted mt-1">
+                  {user ? "Using your account email" : "We'll send your approval status here"}
+                </p>
               </div>
 
               {/* Message */}
@@ -251,7 +294,7 @@ export default function ListAccountPage() {
                 <textarea
                   value={message}
                   onChange={e => setMessage(e.target.value)}
-                  placeholder="Tell us about your live auction style..."
+                  placeholder="Tell us about your live sessions..."
                   rows={3}
                   className="w-full px-4 py-3 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all resize-none"
                 />

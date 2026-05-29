@@ -1,8 +1,15 @@
 import { createClient } from '@supabase/supabase-js'
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('[Livek] Missing Supabase env vars — check Vercel environment variables')
+}
+
 export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  supabaseUrl ?? '',
+  supabaseAnonKey ?? ''
 )
 
 export type Database = {
@@ -26,6 +33,7 @@ export type Database = {
           rating: number
           review_count: number
           status: 'pending' | 'approved' | 'rejected'
+          user_id: string | null
           created_at: string
         }
         Insert: {
@@ -45,6 +53,7 @@ export type Database = {
           rating?: number
           review_count?: number
           status?: 'pending' | 'approved' | 'rejected'
+          user_id?: string | null
           created_at?: string
         }
         Update: {
@@ -71,6 +80,7 @@ export type Database = {
           email: string
           message: string | null
           status: 'pending' | 'approved' | 'rejected'
+          user_id: string | null
           created_at: string
         }
         Insert: {
@@ -84,6 +94,7 @@ export type Database = {
           email: string
           message?: string | null
           status?: 'pending' | 'approved' | 'rejected'
+          user_id?: string | null
           created_at?: string
         }
         Update: {
