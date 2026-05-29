@@ -74,13 +74,14 @@ export async function POST(request: NextRequest) {
       })
 
     if (insertError) {
-      console.error('[creator/apply]', insertError)
-      return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 })
+      console.error('[creator/apply] insert error:', insertError)
+      return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
     return NextResponse.json({ ok: true })
   } catch (err) {
-    console.error('[creator/apply]', err)
-    return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[creator/apply] catch:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
