@@ -49,7 +49,7 @@ export default function CreatorPage({ params }: { params: { handle: string } }) 
           {/* Teal header banner */}
           <div className="h-28 bg-gradient-to-r from-primary to-[#0D9E91]" />
 
-          <div className="px-6 pb-6">
+          <div className="px-4 pb-5 sm:px-6 sm:pb-6">
             <div className="flex items-end justify-between -mt-12 mb-5">
               <div className="relative">
                 <Image
@@ -97,12 +97,12 @@ export default function CreatorPage({ params }: { params: { handle: string } }) 
 
             {/* Bio */}
             <p className="text-sm text-foreground-muted leading-relaxed mb-6">
-              {creator.category} auction specialist with {formatFollowers(creator.followers)} followers.
-              Trusted by thousands of buyers worldwide. Verified seller with a {creator.rating} star rating from {creator.reviewCount} reviews.
+              {creator.category} creator with {formatFollowers(creator.followers)} followers.
+              Trusted by thousands worldwide. Verified with a {creator.rating} star rating from {creator.reviewCount} reviews.
             </p>
 
             {/* Stats */}
-            <div className="grid grid-cols-4 gap-3 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
               {[
                 { label: "Followers", value: formatFollowers(creator.followers) },
                 { label: "Rating", value: `${creator.rating}★` },
@@ -130,7 +130,7 @@ export default function CreatorPage({ params }: { params: { handle: string } }) 
 
         {/* Info tip */}
         <div className="bg-primary-light border border-primary/20 rounded-xl p-4 text-sm text-primary">
-          💡 <strong>How it works:</strong> This creator runs live auction sessions on {isIG ? "Instagram" : "TikTok"}.
+          💡 <strong>How it works:</strong> This creator goes live on {isIG ? "Instagram" : "TikTok"}.
           Head to their profile, follow them, and you&apos;ll get notified the moment they go live.
         </div>
       </div>

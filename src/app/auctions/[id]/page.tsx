@@ -103,7 +103,7 @@ export default async function LiveSessionPage({ params }: { params: Promise<{ id
             </div>
 
             {/* Session info */}
-            <div className="bg-white border border-border rounded-2xl p-6">
+            <div className="bg-white border border-border rounded-2xl p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs font-bold text-primary uppercase tracking-wide bg-primary-light px-2.5 py-1 rounded-full">
                   {session.category}
@@ -120,7 +120,7 @@ export default async function LiveSessionPage({ params }: { params: Promise<{ id
           <div className="space-y-4">
 
             {/* Watch Live CTA */}
-            <div className="bg-white border border-border rounded-2xl p-6 text-center">
+            <div className="bg-white border border-border rounded-2xl p-4 sm:p-6 text-center">
               {session.isLive ? (
                 <>
                   <div className="flex items-center justify-center gap-1.5 text-live font-bold text-sm mb-3">
@@ -204,7 +204,7 @@ export default async function LiveSessionPage({ params }: { params: Promise<{ id
 
         {/* Related creators in same category */}
         {relatedCreators.length > 0 && (
-          <div className="mt-12">
+          <div className="mt-8 sm:mt-12">
             <h2 className="text-xl font-black text-foreground mb-5">
               More {session.category} Creators
             </h2>

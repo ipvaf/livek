@@ -16,8 +16,8 @@ export default function Home() {
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="flex-1 bg-white px-4 py-14 flex items-center">
-        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section className="flex-1 bg-white px-4 py-10 lg:py-14 flex items-center">
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 
           {/* Left */}
           <div>
@@ -26,27 +26,27 @@ export default function Home() {
               {liveCreators.length} creators live right now
             </div>
 
-            <h1 className="text-5xl lg:text-6xl font-black text-foreground leading-tight mb-1">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-foreground leading-tight mb-1">
               Find Who Is Live
             </h1>
-            <p className="text-5xl lg:text-6xl font-black text-primary leading-tight mb-6">
+            <p className="text-4xl sm:text-5xl lg:text-6xl font-black text-primary leading-tight mb-6">
               Right Now
             </p>
 
             <p className="text-foreground-muted text-lg mb-8 max-w-md leading-relaxed">
-              Thousands of live auction creators are streaming right now on Instagram & TikTok — but nobody can find them. Livek is the one place to discover them all.
+              Thousands of creators are streaming live right now on Instagram & TikTok — but nobody can find them. Livek is the one place to discover them all.
             </p>
 
-            <div className="flex items-center gap-3 mb-10 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-10">
               <Link
                 href="/auctions"
-                className="bg-primary hover:bg-primary-hover text-white font-bold px-7 py-3.5 rounded-xl transition-colors text-base"
+                className="bg-primary hover:bg-primary-hover text-white font-bold px-7 py-3.5 rounded-xl transition-colors text-base text-center"
               >
                 See Who&apos;s Live
               </Link>
               <Link
                 href="/auth/signup"
-                className="border border-border text-foreground font-semibold px-7 py-3.5 rounded-xl hover:border-primary hover:text-primary transition-colors text-base"
+                className="border border-border text-foreground font-semibold px-7 py-3.5 rounded-xl hover:border-primary hover:text-primary transition-colors text-base text-center"
               >
                 Register Your Account
               </Link>
@@ -80,7 +80,7 @@ export default function Home() {
       </section>
 
       {/* ── How It Works ── */}
-      <section id="how-it-works" className="bg-surface border-t border-border py-20 px-4">
+      <section id="how-it-works" className="bg-surface border-t border-border py-12 md:py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-primary-light text-primary text-xs font-bold px-3 py-1.5 rounded-full mb-5">
             How It Works
@@ -89,22 +89,22 @@ export default function Home() {
             Thousands of Lives. One Place.
           </h2>
           <p className="text-foreground-muted text-base mb-12 max-w-2xl mx-auto leading-relaxed">
-            Every day, creators go live on Instagram & TikTok doing auctions — cars, watches, sneakers, and more. The problem? Nobody can find them. Livek fixes that.
+            Every day, creators go live on Instagram & TikTok — selling cars, watches, sneakers, and more. The problem? Nobody can find them. Livek fixes that.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 md:mb-12">
             {[
               {
                 step: "01",
                 icon: "📲",
                 title: "Creators Go Live",
-                desc: "Auction creators stream live on Instagram & TikTok daily — but their audiences are scattered and hard to find.",
+                desc: "Creators stream live on Instagram & TikTok daily — but their audiences are scattered and hard to find.",
               },
               {
                 step: "02",
                 icon: "🗂️",
                 title: "We List Them All",
-                desc: "Livek tracks every verified auction creator in one searchable directory — who they are, what they sell, when they go live.",
+                desc: "Livek tracks every verified creator in one searchable directory — who they are, what they sell, when they go live.",
               },
               {
                 step: "03",
