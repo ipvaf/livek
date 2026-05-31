@@ -5,9 +5,9 @@ import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: NextRequest) {
   try {
-    let name = '', email = '', password = ''
-
     const contentType = request.headers.get('content-type') ?? ''
+
+    let name = '', email = '', password = ''
 
     if (contentType.includes('application/json')) {
       const body = await request.json()
@@ -15,7 +15,6 @@ export async function POST(request: NextRequest) {
       email    = (body.email    ?? '').trim()
       password = (body.password ?? '').trim()
     } else {
-      // Native HTML form POST
       const form = await request.formData()
       name     = ((form.get('name')     as string) ?? '').trim()
       email    = ((form.get('email')    as string) ?? '').trim()
@@ -23,13 +22,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!name || !email || !password) {
-      const msg = encodeURIComponent('All fields are required')
-      return NextResponse.redirect(new URL(`/auth/signup?error=${msg}`, request.url), { status: 303 })
+      return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
     }
-
     if (password.length < 6) {
-      const msg = encodeURIComponent('Password must be at least 6 characters')
-      return NextResponse.redirect(new URL(`/auth/signup?error=${msg}`, request.url), { status: 303 })
+      return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
     }
 
     // Create user via admin API (bypasses browser network restrictions)
@@ -41,31 +37,30 @@ export async function POST(request: NextRequest) {
     })
 
     if (createError) {
-      const msg = encodeURIComponent(createError.message)
-      return NextResponse.redirect(new URL(`/auth/signup?error=${msg}`, request.url), { status: 303 })
+      return NextResponse.json({ error: createError.message }, { status: 400 })
     }
 
-    // Sign in server-side to get session tokens
+    // Sign in server-side to get session tokens + user id
     const client = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    const { data: sessionData } = await client.auth.signInWithPassword({ email, password })
+    const { data: sessionData, error: signInError } = await client.auth.signInWithPassword({ email, password })
 
-    if (sessionData?.session) {
-      // Pass tokens to client via the login page (JS path) or redirect home
-      const url = new URL('/auth/session', request.url)
-      url.searchParams.set('at', sessionData.session.access_token)
-      url.searchParams.set('rt', sessionData.session.refresh_token)
-      url.searchParams.set('to', '/')
-      return NextResponse.redirect(url, { status: 303 })
+    if (signInError || !sessionData?.session) {
+      // Account created but couldn't get session — redirect to login
+      return NextResponse.json({ ok: true, redirect: '/auth/login?created=1' })
     }
 
-    // Fallback — account created, ask them to log in
-    return NextResponse.redirect(new URL('/auth/login?created=1', request.url), { status: 303 })
+    return NextResponse.json({
+      ok: true,
+      userId: sessionData.session.user.id,
+      accessToken: sessionData.session.access_token,
+      refreshToken: sessionData.session.refresh_token,
+    })
   } catch (err) {
-    const msg = encodeURIComponent('Something went wrong — please try again')
-    return NextResponse.redirect(new URL(`/auth/signup?error=${msg}`, request.url))
+    console.error('[auth/signup]', err)
+    return NextResponse.json({ error: 'Something went wrong — please try again' }, { status: 500 })
   }
 }
