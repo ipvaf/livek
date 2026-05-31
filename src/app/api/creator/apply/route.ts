@@ -44,19 +44,29 @@ export async function POST(request: NextRequest) {
       platform = 'instagram'
     }
 
-    // Check for existing pending/approved submission with same handle
+    // Check for existing submission with same handle
     const { data: existing } = await supabaseAdmin
       .from('creator_submissions')
-      .select('id, status')
+      .select('id, status, user_id')
       .eq('handle', `@${handle}`)
       .in('status', ['pending', 'approved'])
       .maybeSingle()
 
     if (existing) {
-      const msg = existing.status === 'approved'
-        ? 'This handle is already listed on Livek'
-        : 'A submission for this handle is already under review'
-      return NextResponse.json({ error: msg }, { status: 409 })
+      // If already approved — can't reapply
+      if (existing.status === 'approved') {
+        return NextResponse.json({ error: 'This handle is already listed on Livek' }, { status: 409 })
+      }
+      // If pending and we now have a userId — link it (handles signup flow retry)
+      if (existing.status === 'pending' && userId && !existing.user_id) {
+        await supabaseAdmin
+          .from('creator_submissions')
+          .update({ user_id: userId })
+          .eq('id', existing.id)
+        return NextResponse.json({ ok: true })
+      }
+      // Already pending with a user linked
+      return NextResponse.json({ ok: true }) // Treat as success — submission exists
     }
 
     const { error: insertError } = await supabaseAdmin

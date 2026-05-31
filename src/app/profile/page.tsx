@@ -49,10 +49,12 @@ export default function ProfilePage() {
     }
   }, [user])
 
-  // Fetch creator status
+  // Fetch creator status (pass email as fallback for unlinked submissions)
   useEffect(() => {
     if (!user) return
-    fetch(`/api/creator/status?userId=${user.id}`)
+    const params = new URLSearchParams({ userId: user.id })
+    if (user.email) params.set('email', user.email)
+    fetch(`/api/creator/status?${params}`)
       .then(r => r.json())
       .then(data => setCreatorStatus(data))
       .catch(() => setCreatorStatus({ creator: null, submission: null }))
