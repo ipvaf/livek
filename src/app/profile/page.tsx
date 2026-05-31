@@ -26,6 +26,13 @@ type CreatorStatus = {
   } | null
 }
 
+function profileUrl(platform: string, handle: string): string {
+  const clean = handle.replace(/^@/, "")
+  if (platform === "instagram") return `https://www.instagram.com/${clean}/`
+  if (platform === "tiktok") return `https://www.tiktok.com/@${clean}`
+  return "#"
+}
+
 export default function ProfilePage() {
   const { user, loading, signOut } = useAuth()
   const router = useRouter()
@@ -34,6 +41,7 @@ export default function ProfilePage() {
   const [saveMsg, setSaveMsg] = useState("")
   const [creatorStatus, setCreatorStatus] = useState<CreatorStatus | null>(null)
   const [creatorLoading, setCreatorLoading] = useState(true)
+  const [liveToggling, setLiveToggling] = useState(false)
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -60,6 +68,25 @@ export default function ProfilePage() {
       .catch(() => setCreatorStatus({ creator: null, submission: null }))
       .finally(() => setCreatorLoading(false))
   }, [user])
+
+  async function toggleLive() {
+    if (!creatorStatus?.creator) return
+    setLiveToggling(true)
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch("/api/creator/toggle-live", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ creatorId: creatorStatus.creator.id, accessToken: session?.access_token }),
+    })
+    const data = await res.json()
+    if (data.ok) {
+      setCreatorStatus(prev => prev?.creator
+        ? { ...prev, creator: { ...prev.creator, is_live: data.is_live } }
+        : prev
+      )
+    }
+    setLiveToggling(false)
+  }
 
   async function handleSave() {
     if (!user) return
@@ -119,29 +146,58 @@ export default function ProfilePage() {
             <div className="h-16 bg-surface rounded-xl animate-pulse" />
           ) : creatorStatus?.creator ? (
             /* ── Approved creator ── */
-            <div className="flex items-center justify-between gap-4 p-4 bg-green-50 border border-green-200 rounded-xl">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-green-600 font-black text-sm">✓ Active Creator</span>
-                  {creatorStatus.creator.is_verified && (
-                    <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full font-semibold">Verified</span>
-                  )}
-                  {creatorStatus.creator.is_live && (
-                    <span className="flex items-center gap-1 text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-semibold">
-                      <span className="h-1.5 w-1.5 bg-white rounded-full animate-pulse" />
-                      LIVE
-                    </span>
-                  )}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+                <div>
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="text-green-600 font-black text-sm">✓ Active Creator</span>
+                    {creatorStatus.creator.is_verified && (
+                      <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full font-semibold">Verified</span>
+                    )}
+                    {creatorStatus.creator.is_live && (
+                      <span className="flex items-center gap-1 text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-semibold">
+                        <span className="h-1.5 w-1.5 bg-white rounded-full animate-pulse" />
+                        LIVE
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-foreground font-semibold">{creatorStatus.creator.handle}</p>
+                  <p className="text-xs text-foreground-muted capitalize">{creatorStatus.creator.platform}</p>
                 </div>
-                <p className="text-sm text-foreground font-semibold">{creatorStatus.creator.handle}</p>
-                <p className="text-xs text-foreground-muted capitalize">{creatorStatus.creator.platform}</p>
+                <a
+                  href={profileUrl(creatorStatus.creator.platform, creatorStatus.creator.handle)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-semibold text-primary hover:underline shrink-0"
+                >
+                  View profile →
+                </a>
               </div>
-              <Link
-                href="/creators"
-                className="text-xs font-semibold text-primary hover:underline shrink-0"
+
+              {/* Live toggle */}
+              <button
+                onClick={toggleLive}
+                disabled={liveToggling}
+                className={`w-full flex items-center justify-center gap-2.5 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-50 ${
+                  creatorStatus.creator.is_live
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-primary hover:bg-primary-hover text-white"
+                }`}
               >
-                View profile →
-              </Link>
+                {liveToggling ? (
+                  <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : creatorStatus.creator.is_live ? (
+                  <>
+                    <span className="h-2 w-2 bg-white rounded-full animate-pulse" />
+                    End Live Session
+                  </>
+                ) : (
+                  <>
+                    <span className="h-2 w-2 bg-white rounded-full" />
+                    Go Live Now
+                  </>
+                )}
+              </button>
             </div>
           ) : creatorStatus?.submission ? (
             /* ── Has a submission ── */

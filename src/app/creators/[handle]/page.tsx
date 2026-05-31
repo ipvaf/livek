@@ -3,8 +3,10 @@ import Image from "next/image"
 import { notFound } from "next/navigation"
 import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/Footer"
-import { creators } from "@/lib/mock-data"
-import { ArrowLeft } from "lucide-react"
+import { supabaseAdmin } from "@/lib/supabase-admin"
+import { ArrowLeft, ExternalLink } from "lucide-react"
+
+export const dynamic = "force-dynamic"
 
 const InstagramIcon = () => (
   <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
@@ -19,20 +21,34 @@ const TikTokIcon = () => (
 )
 
 function formatFollowers(n: number): string {
-  if (n >= 1000000) return (n / 1000000).toFixed(1) + "M"
-  if (n >= 1000) return (n / 1000).toFixed(0) + "K"
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M"
+  if (n >= 1_000) return (n / 1_000).toFixed(0) + "K"
   return String(n)
 }
 
-export function generateStaticParams() {
-  return creators.map(c => ({ handle: c.handle.replace("@", "") }))
+function profileUrl(platform: string, handle: string): string {
+  const clean = handle.replace(/^@/, "")
+  if (platform === "instagram") return `https://www.instagram.com/${clean}/`
+  if (platform === "tiktok") return `https://www.tiktok.com/@${clean}`
+  return "#"
 }
 
-export default function CreatorPage({ params }: { params: { handle: string } }) {
-  const creator = creators.find(c => c.handle.replace("@", "") === params.handle)
-  if (!creator) notFound()
+export default async function CreatorPage({ params }: { params: Promise<{ handle: string }> }) {
+  const { handle } = await params
 
-  const isIG = creator.platform === "instagram"
+  // Try DB first
+  const { data: row } = await supabaseAdmin
+    .from("creators")
+    .select("*")
+    .eq("status", "approved")
+    .ilike("handle", `@${handle}`)
+    .maybeSingle()
+
+  if (!row) notFound()
+
+  const isIG = row.platform === "instagram"
+  const avatar = row.avatar_url ?? `https://api.dicebear.com/7.x/avataaars/svg?seed=${row.handle}`
+  const liveUrl = profileUrl(row.platform, row.handle)
 
   return (
     <div className="min-h-screen bg-surface">
@@ -46,68 +62,79 @@ export default function CreatorPage({ params }: { params: { handle: string } }) 
 
         {/* Profile card */}
         <div className="bg-white border border-border rounded-2xl overflow-hidden mb-4">
-          {/* Teal header banner */}
+          {/* Banner */}
           <div className="h-28 bg-gradient-to-r from-primary to-[#0D9E91]" />
 
           <div className="px-4 pb-5 sm:px-6 sm:pb-6">
             <div className="flex items-end justify-between -mt-12 mb-5">
               <div className="relative">
                 <Image
-                  src={creator.avatar}
-                  alt={creator.displayName}
+                  src={avatar}
+                  alt={row.display_name}
                   width={80}
                   height={80}
                   className="rounded-full ring-4 ring-white object-cover"
+                  unoptimized
                 />
                 <div className={`absolute -bottom-1 -right-1 h-7 w-7 rounded-full flex items-center justify-center text-white ${isIG ? "bg-instagram" : "bg-tiktok"}`}>
                   {isIG ? <InstagramIcon /> : <TikTokIcon />}
                 </div>
               </div>
 
-              {/* Platform badge + Join Live CTA */}
-              <a
-                href="#"
-                className="flex items-center gap-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover px-5 py-2.5 rounded-xl transition-colors"
-              >
-                Join Live
-              </a>
+              {/* Join Live CTA */}
+              {row.is_live ? (
+                <a
+                  href={liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 px-5 py-2.5 rounded-xl transition-colors"
+                >
+                  <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                  Join Live
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              ) : (
+                <a
+                  href={liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover px-5 py-2.5 rounded-xl transition-colors"
+                >
+                  View Profile
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
             </div>
 
-            {/* Name + verified + live */}
+            {/* Name + badges */}
             <div className="mb-4">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <h1 className="text-xl font-black text-foreground">{creator.displayName}</h1>
-                {creator.verified && (
-                  <svg className="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
+                <h1 className="text-xl font-black text-foreground">{row.display_name}</h1>
+                {row.is_verified && (
+                  <svg className="h-5 w-5 text-primary shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 )}
                 <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full text-white ${isIG ? "bg-instagram" : "bg-tiktok"}`}>
                   {isIG ? "Instagram" : "TikTok"}
                 </span>
-                {creator.isLive && (
+                {row.is_live && (
                   <div className="flex items-center gap-1 bg-red-50 text-live text-xs font-bold px-2.5 py-1 rounded-full">
-                    <span className="live-dot h-1.5 w-1.5 rounded-full bg-live inline-block" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-live inline-block animate-pulse" />
                     LIVE
                   </div>
                 )}
               </div>
-              <p className="text-sm text-foreground-muted">{creator.handle} · {creator.flag} {creator.countryName}</p>
+              <p className="text-sm text-foreground-muted">{row.handle} · {row.flag ?? "🌍"} {row.country_name ?? row.country}</p>
             </div>
-
-            {/* Bio */}
-            <p className="text-sm text-foreground-muted leading-relaxed mb-6">
-              {creator.category} creator with {formatFollowers(creator.followers)} followers.
-              Trusted by thousands worldwide. Verified with a {creator.rating} star rating from {creator.reviewCount} reviews.
-            </p>
 
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
               {[
-                { label: "Followers", value: formatFollowers(creator.followers) },
-                { label: "Rating", value: `${creator.rating}★` },
-                { label: "Reviews", value: creator.reviewCount },
-                { label: "Country", value: creator.flag },
+                { label: "Followers", value: formatFollowers(row.followers ?? 0) },
+                { label: "Rating",    value: row.rating ? `${row.rating}★` : "—" },
+                { label: "Reviews",   value: row.review_count ?? 0 },
+                { label: "Country",   value: row.flag ?? "🌍" },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-surface border border-border rounded-xl p-3 text-center">
                   <p className="text-lg font-black text-foreground">{value}</p>
@@ -118,11 +145,13 @@ export default function CreatorPage({ params }: { params: { handle: string } }) 
 
             {/* Tags */}
             <div className="flex flex-wrap gap-2">
-              <span className="text-xs bg-primary-light border border-primary/20 text-primary rounded-full px-3 py-1 font-medium">
-                {creator.category}
-              </span>
+              {row.category && (
+                <span className="text-xs bg-primary-light border border-primary/20 text-primary rounded-full px-3 py-1 font-medium capitalize">
+                  {row.category}
+                </span>
+              )}
               <span className="text-xs bg-surface border border-border text-foreground-muted rounded-full px-3 py-1">
-                {creator.flag} {creator.countryName}
+                {row.flag ?? "🌍"} {row.country_name ?? row.country}
               </span>
             </div>
           </div>
@@ -131,7 +160,7 @@ export default function CreatorPage({ params }: { params: { handle: string } }) 
         {/* Info tip */}
         <div className="bg-primary-light border border-primary/20 rounded-xl p-4 text-sm text-primary">
           💡 <strong>How it works:</strong> This creator goes live on {isIG ? "Instagram" : "TikTok"}.
-          Head to their profile, follow them, and you&apos;ll get notified the moment they go live.
+          Click <strong>{row.is_live ? "Join Live" : "View Profile"}</strong> to open their profile, follow them, and you&apos;ll get notified the moment they go live.
         </div>
       </div>
 
