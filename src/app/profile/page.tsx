@@ -164,7 +164,7 @@ export default function ProfilePage() {
                     You can submit a new application.
                   </p>
                   <Link
-                    href="/sell"
+                    href="/apply"
                     className="inline-block text-xs font-semibold bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-hover transition-colors"
                   >
                     Reapply
@@ -180,7 +180,7 @@ export default function ProfilePage() {
                 <p className="text-xs text-foreground-muted">Apply to list your Instagram or TikTok account on Livek.</p>
               </div>
               <Link
-                href="/sell"
+                href="/apply"
                 className="shrink-0 text-xs font-bold bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl transition-colors"
               >
                 Apply Now

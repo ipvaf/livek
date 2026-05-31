@@ -94,7 +94,7 @@ export function Navbar() {
             EN
           </button>
           <Link
-            href="/sell"
+            href="/apply"
             className="text-sm font-semibold text-primary border border-primary/30 bg-primary-light hover:bg-primary hover:text-white px-3 py-1.5 rounded-lg transition-all"
           >
             List Account
@@ -135,7 +135,7 @@ export function Navbar() {
           <Link href="/auctions" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Live Now</Link>
           <Link href="/creators" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>Creators</Link>
           <Link href="/#how-it-works" className="block py-2 text-foreground-muted hover:text-primary" onClick={() => setOpen(false)}>How It Works</Link>
-          <Link href="/sell" className="block py-2 text-primary font-semibold hover:text-primary-hover" onClick={() => setOpen(false)}>List Your Account</Link>
+          <Link href="/apply" className="block py-2 text-primary font-semibold hover:text-primary-hover" onClick={() => setOpen(false)}>List Your Account</Link>
 
           {!loading && (
             <div className="pt-2 border-t border-border">

@@ -36,7 +36,7 @@ export default function LiveNowPage() {
           </div>
 
           <Link
-            href="/sell"
+            href="/apply"
             className="flex items-center justify-center gap-2 bg-primary-light border border-primary/30 text-primary text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-primary hover:text-white transition-all sm:shrink-0"
           >
             <span>📡</span>
@@ -58,7 +58,7 @@ export default function LiveNowPage() {
             <p className="text-white/80 text-sm">Get listed on Livek and reach thousands of people. It&apos;s free.</p>
           </div>
           <Link
-            href="/sell"
+            href="/apply"
             className="shrink-0 bg-white text-primary font-bold px-6 py-3 rounded-xl hover:bg-primary-light transition-colors text-sm"
           >
             List Your Account →
