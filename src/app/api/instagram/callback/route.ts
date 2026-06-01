@@ -5,10 +5,12 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 /**
  * GET /api/instagram/callback?code=...&state=<creatorId>
  * Meta redirects here after the creator approves the app.
+ * Uses NEW Instagram Business Login (not deprecated Basic Display API).
+ *
  * 1. Exchange code for short-lived token
- * 2. Exchange for long-lived token (60 days)
- * 3. Get the Instagram User ID
- * 4. Store in creators table
+ * 2. Fetch Instagram user ID from /me (Business Login returns it differently)
+ * 3. Exchange for long-lived token (60 days)
+ * 4. Store token + user ID in creators table
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -19,6 +21,7 @@ export async function GET(request: NextRequest) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://livek.vercel.app'
 
   if (error || !code || !creatorId) {
+    console.error('[instagram/callback] OAuth denied or missing params:', { error, code: !!code, creatorId })
     return NextResponse.redirect(`${baseUrl}/profile?instagram_error=1`)
   }
 
@@ -27,7 +30,8 @@ export async function GET(request: NextRequest) {
   const redirectUri = `${baseUrl}/api/instagram/callback`
 
   try {
-    // Step 1: Exchange code for short-lived token
+    // Step 1: Exchange authorization code for short-lived token
+    // Token endpoint is the same for both old and new Instagram Login
     const tokenRes = await fetch('https://api.instagram.com/oauth/access_token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -47,27 +51,46 @@ export async function GET(request: NextRequest) {
     }
 
     const shortToken = tokenData.access_token
-    const igUserId   = tokenData.user_id as string
 
-    // Step 2: Exchange for long-lived token (60-day expiry)
-    const longTokenRes = await fetch(
+    // Step 2: Get Instagram User ID
+    // Business Login returns user_id in the token response (same field as Basic Display)
+    // Fallback: fetch from Graph API /me endpoint
+    let igUserId: string = tokenData.user_id?.toString() ?? ''
+    if (!igUserId) {
+      const meRes  = await fetch(`https://graph.instagram.com/me?fields=id&access_token=${shortToken}`)
+      const meData = await meRes.json()
+      igUserId     = meData.id ?? ''
+    }
+
+    if (!igUserId) {
+      console.error('[instagram/callback] could not determine Instagram user ID')
+      return NextResponse.redirect(`${baseUrl}/profile?instagram_error=1`)
+    }
+
+    // Step 3: Exchange short-lived token for long-lived token (60-day expiry)
+    const longTokenRes  = await fetch(
       `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${appSecret}&access_token=${shortToken}`
     )
     const longTokenData = await longTokenRes.json()
     const longToken     = longTokenData.access_token ?? shortToken
-    const expiresIn     = longTokenData.expires_in ?? 5184000 // 60 days default
+    const expiresIn     = longTokenData.expires_in   ?? 5184000 // 60 days default
 
     const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString()
 
-    // Step 3: Save to creators table
-    await supabaseAdmin
+    // Step 4: Save to creators table
+    const { error: dbError } = await supabaseAdmin
       .from('creators')
       .update({
-        instagram_user_id:        igUserId,
-        instagram_access_token:   longToken,
+        instagram_user_id:          igUserId,
+        instagram_access_token:     longToken,
         instagram_token_expires_at: expiresAt,
       })
       .eq('id', creatorId)
+
+    if (dbError) {
+      console.error('[instagram/callback] DB update failed:', dbError)
+      return NextResponse.redirect(`${baseUrl}/profile?instagram_error=1`)
+    }
 
     return NextResponse.redirect(`${baseUrl}/profile?instagram_connected=1`)
   } catch (err) {
